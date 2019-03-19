@@ -20,12 +20,12 @@ COPY --from=prometheus-builder /root/go/src/github.com/prometheus/prometheus/cmd
 COPY --from=prometheus-builder --chown=nobody:nogroup /etc/prometheus/ /etc/prometheus/
 COPY --from=prometheus-builder --chown=nobody:nogroup /data/ /data/
 
-USER			nobody
+USER		nobody
 
-VOLUME			[ "/data" ]
-EXPOSE			9090
-ENTRYPOINT		[ "prometheus" ]
-CMD 			[ "--config.file=/etc/prometheus/prometheus.yml", \
-				  "--storage.tsdb.path=/data", \
-				  "--web.console.libraries=/etc/prometheus/console_libraries", \
-				  "--web.console.templates=/etc/prometheus/consoles" ]
+VOLUME		[ "/data" ]
+EXPOSE		9090
+ENTRYPOINT	[ "prometheus" ]
+CMD 		[ "--config.file=/etc/prometheus/prometheus.yml", \
+			  "--storage.tsdb.path=/data", \
+			  "--web.console.libraries=/etc/prometheus/console_libraries", \
+			  "--web.console.templates=/etc/prometheus/consoles" ]
