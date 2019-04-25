@@ -1,20 +1,20 @@
-FROM debian:stretch-slim AS prometheus-builder
+FROM debian:9.8-slim AS prometheus-builder
 
-COPY --from=golang:stretch /usr/local/go /usr/local/go
+COPY --from=golang:1.12 /usr/local/go /usr/local/go
 
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go \
  && apt-get update && apt-get -y install git \
  && mkdir -p ~/go/src/github.com/prometheus/prometheus \
  && mkdir /data \
  && mkdir /etc/prometheus \
- && git clone -b master https://github.com/prometheus/prometheus.git ~/go/src/github.com/prometheus/prometheus \
+ && git clone -b v2.9.2 https://github.com/prometheus/prometheus.git ~/go/src/github.com/prometheus/prometheus \
  && cd ~/go/src/github.com/prometheus/prometheus/cmd/prometheus/ \
  && GOOS=linux GOARCH=arm64 go build \
  && cp ~/go/src/github.com/prometheus/prometheus/documentation/examples/prometheus.yml /etc/prometheus/prometheus.yml \
  && cp -r ~/go/src/github.com/prometheus/prometheus/console_libraries /etc/prometheus \
  && cp -r ~/go/src/github.com/prometheus/prometheus/consoles /etc/prometheus
 
-FROM arm64v8/busybox:glibc
+FROM arm64v8/busybox:1.30-glibc
 
 COPY --from=prometheus-builder /root/go/src/github.com/prometheus/prometheus/cmd/prometheus/prometheus /usr/sbin/prometheus
 COPY --from=prometheus-builder --chown=nobody:nogroup /etc/prometheus/ /etc/prometheus/
@@ -26,6 +26,6 @@ VOLUME		[ "/data" ]
 EXPOSE		9090
 ENTRYPOINT	[ "prometheus" ]
 CMD 		[ "--config.file=/etc/prometheus/prometheus.yml", \
-			  "--storage.tsdb.path=/data", \
-			  "--web.console.libraries=/etc/prometheus/console_libraries", \
-			  "--web.console.templates=/etc/prometheus/consoles" ]
+              "--storage.tsdb.path=/data", \
+              "--web.console.libraries=/etc/prometheus/console_libraries", \
+              "--web.console.templates=/etc/prometheus/consoles" ]
